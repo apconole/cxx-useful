@@ -2,7 +2,7 @@
 #+AUTHOR:      Aaron Conole
 #+EMAIL:       apconole@yahoo.com
 #+STARTUP:     content
-#+Last Update: 2014-11-08@21:21
+#+Last Update: 2014-11-09@11:4s1
 
 * 1. What's this?
 
@@ -34,3 +34,27 @@ of the familiar iterator constructs (operator+, operator*, operator-, operator++
 operator--, etc.), and provides various iterator traits and typedefs making it suitable for
 use in various standard library functions. It does not conform perfectly to all of the 
 iterator requirements, so YMMV.
+
+An important note is that the cyclic iterator assumes that the beginning and end iterators
+are always valid. If either one could become invalid (via, for instance, an insert or erase
+on the underlying container), then the cyclic_iterator is also invalidated.
+
+*** 3-1-1. Ring Buffers
+
+Because of the way the cyclic_iterator works, it is possible to pre-allocate a certain
+sized std::vector or std::list, and use the cyclic_iterator to create either a forward
+ring buffer (using .begin() and .end()) or a reverse ring buffer (using .rbegin() and
+.rend()). Effectively, any container which offers these kinds of semantics can be used
+(including a map, if you can figure out how the semantics on that would work).
+
+Since the cyclic_iterator does not modify the structure of the underlying container, it
+should be safe to use with any standard based container (but, again, YMMV). Included is
+an example in the =ring_buffer_ex.cpp= file.
+
+*** 3-1-2. Moving Average 'filter'
+
+Since we can actually create a ring buffer, it's possible to make a ring-buffer of a
+certain size, and use a std::accumulate, plus simple division to create a quick 'n 
+dirty (albeit, probably not optimally efficient) moving average filter.
+
+This is detailed in the =moving_average.cpp= file.

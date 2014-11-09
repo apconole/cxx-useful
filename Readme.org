@@ -1,0 +1,36 @@
+#+TITLE:       README for cxx-useful
+#+AUTHOR:      Aaron Conole
+#+EMAIL:       apconole@yahoo.com
+#+STARTUP:     content
+#+Last Update: 2014-11-08@21:21
+
+* 1. What's this?
+
+The main purpose of this repository is for me to play around with C++ class designs, and other goof-off type stuff.
+
+** 1-1. Can _I_ edit your stuff?
+
+Sure, go ahead. Hopefully, it is useful for you; I'm doubtful though.
+
+** 1-2. Is this in the public domain?
+
+Each file will clearly state if it is public domain or not. I won't blanket release things. If a file does NOT, assume BSD license.
+
+* 2. Install
+
+Generally, I try to make these kinds of files =header-only= so just make them available in your =include path=. 
+
+** 2-1. Requirements
+
+A C++ compiler; I use GCC 4.6+.
+
+* 3. Features
+
+** 3-1. Cyclic Iterator
+
+The Cyclic Iterator is a wrapper for a region of iterable data, and circulates through the
+region in a familiar fashion (ie: from beginning to end-1, ad infinitum). It provides many
+of the familiar iterator constructs (operator+, operator*, operator-, operator++, 
+operator--, etc.), and provides various iterator traits and typedefs making it suitable for
+use in various standard library functions. It does not conform perfectly to all of the 
+iterator requirements, so YMMV.

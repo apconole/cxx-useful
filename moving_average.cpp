@@ -16,7 +16,8 @@ void moving_average_main()
     cyclic_iterator<std::vector<long int>::iterator> iCycles(cSlidingWindowAverage.begin(), cSlidingWindowAverage.end());
 
     std::cout << "Input numbers with the last one being 0." << std::endl;
-    std::cout << "Each iteration, the system will run a moving average" << std::endl;
+    std::cout << "Each iteration, the system will run a moving average"
+              << std::endl;
     
     long int nInputValue = 0;
     do
@@ -32,18 +33,24 @@ void moving_average_main()
             cSlidingWindowAverage.begin(),
             cSlidingWindowAverage.end(), 0);
 
-        double dAverage = iAccumulation / cSlidingWindowAverage.size();
+        // note: in the below, we need to cast to double to ensure that the
+        // calculation doesn't truncate.
+        double dAverage = double(iAccumulation) /
+            double(cSlidingWindowAverage.size());
 
         std::cout << " { " << dAverage << "}" << std::endl;
         
     }while( nInputValue != 0 );
 }
 
-class RunTheMovingAverageExample
+namespace cxx_utils_examples
 {
-public:
-    RunTheMovingAverageExample(){ moving_average_main(); }
-    ~RunTheMovingAverageExample(){}
-};
-
-static RunTheMovingAverageExample s_rtmae;
+    class RunTheMovingAverageExample
+    {
+    public:
+        RunTheMovingAverageExample(){ moving_average_main(); }
+        ~RunTheMovingAverageExample(){}
+    };
+    
+    static RunTheMovingAverageExample s_rtmae;
+}

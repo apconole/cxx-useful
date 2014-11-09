@@ -44,12 +44,14 @@ void ring_buffer_main_ex()
     
 }
 
-class RunTheRingBufferExample
+namespace cxx_utils_examples
 {
-public:
-    RunTheRingBufferExample(){ ring_buffer_main_ex(); }
-    ~RunTheRingBufferExample(){}
-};
+    class RunTheRingBufferExample
+    {
+    public:
+        RunTheRingBufferExample(){ ring_buffer_main_ex(); }
+        ~RunTheRingBufferExample(){}
+    };
 
-static RunTheRingBufferExample s_rtrbe;
-
+    static RunTheRingBufferExample s_rtrbe;
+}

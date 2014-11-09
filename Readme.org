@@ -2,7 +2,7 @@
 #+AUTHOR:      Aaron Conole
 #+EMAIL:       apconole@yahoo.com
 #+STARTUP:     content
-#+Last Update: 2014-11-09@11:4s1
+#+Last Update: 2014-11-09@12:02
 
 * 1. What's this?
 
@@ -58,3 +58,11 @@ certain size, and use a std::accumulate, plus simple division to create a quick 
 dirty (albeit, probably not optimally efficient) moving average filter.
 
 This is detailed in the =moving_average.cpp= file.
+** 3-2. Print Vector
+
+Print vector is a handy utility function for printing a simple vector to the screen using
+nothing more than the std::ostream_iterator. Additionally, the print vector function 
+includes a handy ability to change the delimiter using =setdelim()= with a character 
+value.
+
+The print vector tries very hard to make the output look smooth.

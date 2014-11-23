@@ -19,9 +19,10 @@ else
 CHECK_SYNTAXES+=check-syntax-cxx
 endif
 
-SAMPLE_PROGRAMS=cyclic_iterator_examples 
+SAMPLE_PROGRAMS=cyclic_iterator_examples saturation_iterator_examples
 
 CYCLIC_ITERATOR_EXAMPLE_OBJS=ring_buffer_ex.cpp moving_average.cpp 
+SATURATION_ITERATOR_EXAMPLE_OBJS=saturation_test.cpp
 
 .PHONY: all check-syntax check-syntax-c check-syntax-cxx
 
@@ -38,3 +39,6 @@ check-syntax: $(CHECK_SYNTAXES)
 
 cyclic_iterator_examples: cyclic_iterator_examples.cpp $(CYCLIC_ITERATOR_EXAMPLE_OBJS) 
 	$(CXX) $(CXXFLAGS) -o $@ $< $(CYCLIC_ITERATOR_EXAMPLE_OBJS)
+
+saturation_iterator_examples: saturation_iterator_examples.cpp $(SATURATION_ITERATOR_EXAMPLE_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(SATURATION_ITERATOR_EXAMPLE_OBJS)

@@ -12,8 +12,8 @@ using namespace cxx_utils;
 
 double PerformMultiplyInLinearDomain( const double &rDbl, const double &rDbl2 )
 {
-    double dElem1Lin = std::pow(10.0f, rDbl/10.0f);
-    double dElem2Lin = std::pow(10.0f, rDbl2/10.0f);
+    double dElem1Lin = std::pow(double(10.0f), rDbl/10.0f);
+    double dElem2Lin = std::pow(double(10.0f), rDbl2/10.0f);
 
     return double(10.0) * std::log10(dElem1Lin * dElem2Lin);
 }

@@ -41,7 +41,7 @@ check-syntax-cxx:
 check-syntax: $(CHECK_SYNTAXES)
 
 clean:
-	$(RM) -rf $(SAMPLE_PROGRAMS) $(CYCLIC_ITERATOR_EXAMPLE_OBJS) $(SATURATION_ITERATOR_EXAMPLE_OBJS) $(FILE_DESCRIPTOR_EXAMPLE_OBJS)
+	$(RM) -rf $(SAMPLE_PROGRAMS) *~ *.o
 
 cyclic_iterator_examples: cxxutils_examples_base.cpp $(CYCLIC_ITERATOR_EXAMPLE_OBJS) 
 	$(CXX) $(CXXFLAGS) -DEXAMPLES_STRING="\"Cyclic Iterator\"" -o $@ $< $(CYCLIC_ITERATOR_EXAMPLE_OBJS)

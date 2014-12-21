@@ -20,6 +20,11 @@
 #include <cstdio>
 #include <cstring>
 
+#ifdef WIN32
+#include <fcntl.h>
+#include <windows.h>
+#endif
+
 #ifndef __FILE_DESCRIPTOR_BUFFER__H__
 #define __FILE_DESCRIPTOR_BUFFER__H__
 

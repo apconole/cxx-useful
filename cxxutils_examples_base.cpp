@@ -1,5 +1,9 @@
 #include <iostream>
 
+#ifndef EXAMPLES_STRING
+#define EXAMPLES_STRING "???"
+#endif
+
 namespace cxx_utils_examples
 {
     void RunExamples()
@@ -10,7 +14,7 @@ namespace cxx_utils_examples
 
 int main()
 {
-    std::cout << "Cyclic Iterator Examples." << std::endl;
+    std::cout << EXAMPLES_STRING << " Examples." << std::endl;
     cxx_utils_examples::RunExamples();
     return 0;
 }

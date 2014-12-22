@@ -5,7 +5,7 @@
 #include <vector>
 #include <numeric>
 
-using cxx_utils::cyclic_iterator;
+using cxx_utils::iterator::cyclic_iterator;
 
 void moving_average_main()
 {

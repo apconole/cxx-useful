@@ -8,7 +8,8 @@
 #include <numeric>
 #include <cmath>
 
-using namespace cxx_utils;
+using namespace cxx_utils::iterator;
+using namespace cxx_utils::io;
 
 double PerformMultiplyInLinearDomain( const double &rDbl, const double &rDbl2 )
 {

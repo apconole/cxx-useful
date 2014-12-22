@@ -6,7 +6,8 @@
 #include <vector>
 #include <iostream>
 
-using namespace cxx_utils;
+using namespace cxx_utils::iterator;
+using namespace cxx_utils::io;
 
 void ring_buffer_main_ex()
 {

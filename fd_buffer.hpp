@@ -25,8 +25,18 @@
 #include <windows.h>
 #endif
 
+#include <iostream>
+
 #ifndef __FILE_DESCRIPTOR_BUFFER__H__
 #define __FILE_DESCRIPTOR_BUFFER__H__
+
+#ifdef WIN32
+#define CXX_USEFUL_POPEN _popen
+#define CXX_USEFUL_PCLOSE _pclose
+#else
+#define CXX_USEFUL_POPEN popen
+#define CXX_USEFUL_PCLOSE pclose
+#endif
 
 namespace cxx_utils
 {
@@ -145,6 +155,42 @@ namespace cxx_utils
             const std::size_t m_nPutBack;
             bool              m_bOwner;
         };
+
+        /**
+         * @brief A "Process-Input" stream, providing an easy way to read the
+         * output of a platform external process.
+         *
+         * A pistream is a construct which allows calling an external
+         * executable via a "popen" call, and provides an input stream to
+         * access that process' stdout.
+         */
+        class pistream : public std::istream
+        {
+            FILE      *m_pFile;
+            fd_buffer *m_pOpenedStream;
+        public:
+            pistream( const char *pBinary ) : std::istream(0),
+                                              m_pFile(0), m_pOpenedStream(0)
+            {
+                if( pBinary )
+                {
+                    m_pFile = CXX_USEFUL_POPEN (pBinary, "r");
+                    if( !m_pFile ) return;
+                    m_pOpenedStream = new
+                        cxx_utils::io::fd_buffer(fileno(m_pFile));
+                    rdbuf(m_pOpenedStream);
+                }
+            }
+            
+            virtual ~pistream()
+            {
+                if( m_pFile ) CXX_USEFUL_PCLOSE( m_pFile );
+                delete m_pOpenedStream;
+            }
+        };
+        
     }
+
+    
 }
 #endif

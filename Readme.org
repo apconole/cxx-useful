@@ -2,7 +2,7 @@
 #+AUTHOR:      Aaron Conole
 #+EMAIL:       apconole@yahoo.com
 #+STARTUP:     content
-#+Last Update: 2014-11-09@12:02
+#+Last Update: 2014-12-22@13:37
 
 * 1. What's this?
 
@@ -39,6 +39,8 @@ An important note is that the cyclic iterator assumes that the beginning and end
 are always valid. If either one could become invalid (via, for instance, an insert or erase
 on the underlying container), then the cyclic_iterator is also invalidated.
 
+=using cxx_utils::iterator::cyclic_iterator;=
+
 *** 3-1-1. Ring Buffers
 
 Because of the way the cyclic_iterator works, it is possible to pre-allocate a certain
@@ -66,3 +68,35 @@ includes a handy ability to change the delimiter using =setdelim()= with a chara
 value.
 
 The print vector tries very hard to make the output look smooth.
+
+=using namespace cxx_utils::io;=
+
+** 3-3. Saturation Iterator
+
+The Saturation Iterator is a wrapper for a region of iterable data, and will 'saturate' by
+failing to advance when reaching the =end()= or =begin()= container region. Because the
+saturation iterator takes the range of *[ =begin= .. =end= )* it can be used on sub-region
+of a particular container. Be mindful that it does not check the validity of the underlying
+iterators / container; anything which would invalidate an iterator will invalidate any
+corresponding saturation iterator.
+
+=using cxx_utils::iterator::saturation_iterator;=
+
+** 3-4. File Descriptor streambuf
+
+The =fd_streambuf= provides a POSIX-to-stdc++ bridge by providing a way of accessing a 
+standard *C* file descriptor (which is somehow not part of standard *C++*... go figure)
+
+Since different operating systems treat things like sockets differently, this won't be
+the /best/ way of hooking a TCP/SCTP stream up to a standard C++ stream. On the 
+otherhand, it does work and allows extension for a socket streambuf.
+
+=using cxx_utils::io::fd_buffer;=
+
+*** 3-4-1. Process Input Stream
+
+A =pistream= is creating by opening a process via the appropriate =popen= call and 
+hooking up to the underlying file number. The pistream allows reading process output
+data.
+
+=using cxx_utils::io::pistream;=

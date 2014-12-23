@@ -23,6 +23,9 @@
 #ifdef WIN32
 #include <fcntl.h>
 #include <windows.h>
+#else
+#include <sys/ioctl.h>
+#include <sys/select.h>
 #endif
 
 #include <iostream>
@@ -139,9 +142,51 @@ namespace cxx_utils
 
                 return std::streamsize(result);
             }
-            
+
         protected:
 
+            virtual std::streamsize showmanyc()
+            {
+                std::streamsize result = 0;
+                // here we'll first do a basic fd check via select
+                {
+                    timeval tv;
+                    tv.tv_sec = tv.tv_usec = 0;
+
+                    fd_set fds;
+                    FD_ZERO( &fds );
+                    FD_SET(
+#ifdef WIN32
+                        (usigned int)
+#endif
+                        m_nFileDes, &fds
+                           );
+                    // note: select is part of POSIX, not C/C++; hopefully it
+                    // exists on the target system.
+                    if (0 < select(m_nFileDes + 1, &fds, NULL, NULL, &tv))
+                    {
+                        result = 1;
+                    }
+                }
+
+                if( result <= 0 )
+                {
+                    result = internal_rd_ioctl();
+                }
+
+                return result;
+            }
+
+            virtual std::streamsize internal_rd_ioctl()
+            {
+                int numBytes = 0;
+#ifdef FIONREAD
+                if( 0 > ioctl(m_nFileDes, FIONREAD, (void *)&numBytes) )
+                    return std::streamsize(-1);
+#endif
+                return numBytes;
+            }
+            
             virtual ssize_t internal_read(void *buf, size_t len)
             { return read(m_nFileDes, buf, len); }
             
@@ -188,7 +233,31 @@ namespace cxx_utils
                 delete m_pOpenedStream;
             }
         };
-        
+
+        class postream : public std::ostream
+        {
+            FILE      *m_pFile;
+            fd_buffer *m_pOpenedStream;
+        public:
+            postream( const char *pBinary ) : std::ostream(0),
+                                              m_pFile(0), m_pOpenedStream(0)
+            {
+                if( pBinary )
+                {
+                    m_pFile = CXX_USEFUL_POPEN (pBinary, "w");
+                    if( !m_pFile ) return;
+                    m_pOpenedStream = new
+                        cxx_utils::io::fd_buffer(fileno(m_pFile));
+                    rdbuf(m_pOpenedStream);
+                }
+            }
+            
+            virtual ~postream()
+            {
+                if( m_pFile ) CXX_USEFUL_PCLOSE( m_pFile );
+                delete m_pOpenedStream;
+            }
+        };
     }
 
     

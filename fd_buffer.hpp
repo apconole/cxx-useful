@@ -26,6 +26,7 @@
 #else
 #include <sys/ioctl.h>
 #include <sys/select.h>
+#include <unistd.h>
 #endif
 
 #include <iostream>

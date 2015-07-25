@@ -35,3 +35,7 @@ GTAGS
 *.exe
 *.out
 *.app
+
+cyclic_iterator_examples
+file_descriptor_examples
+saturation_iterator_examples

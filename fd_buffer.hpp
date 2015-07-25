@@ -85,7 +85,7 @@ namespace cxx_utils
             
             virtual ~fd_buffer()
             {
-                if( m_nFileDes != -1 && m_bOwner ) close(m_nFileDes);
+                if( m_nFileDes != -1 && m_bOwner ) fdclose(m_nFileDes);
             }
 
             std::streambuf::int_type underflow()
@@ -193,7 +193,10 @@ namespace cxx_utils
             
             virtual ssize_t internal_write(void *buf, size_t len)
             { return write(m_nFileDes, buf, len); }
-        
+
+            virtual void fdclose(int fd)
+            { close(fd); }
+            
             char *BufferStart(){ return &m_cBuffer.front(); }
         
             std::vector<char> m_cBuffer;

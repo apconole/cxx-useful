@@ -23,8 +23,8 @@
 
 #pragma once
 
-#ifndef __CYCLIC_ITERATOR__H__
-#define __CYCLIC_ITERATOR__H__
+#ifndef __SATURATION_ITERATOR__H__
+#define __SATURATION_ITERATOR__H__
 
 #include <iterator>
 #include <algorithm>

@@ -4,7 +4,7 @@ CXX=g++
 RM=rm
 
 CFLAGS=-I. -O3 -Wall -Werror
-CXXFLAGS=-I. -O3 -Wall -Werror
+CXXFLAGS=-I. -O3 -Wall -Werror -std=c++11
 
 CHK_SOURCES_C=$(filter %.c, $(CHK_SOURCES))
 CHK_SOURCES_CXX=$(filter %.cpp %.cc %.cxx, $(CHK_SOURCES))

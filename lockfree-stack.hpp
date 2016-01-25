@@ -15,6 +15,7 @@
 #include <atomic>
 #include <stdint.h>
 #include <stdexcept>
+#include <memory>
 
 #ifndef LOCK_FREE_HEAP_NODE__H
 #define LOCK_FREE_HEAP_NODE__H
@@ -43,8 +44,13 @@ namespace cxx_utils
             typedef lfstackNode* node_pointer;
             typedef lfstackNode  node_type;
             typedef std::atomic<lfstackNode*> atomic_node_type;
+            typedef std::shared_ptr<node_type> node_shared_pointer;
 
             atomic_node_type head;
+            atomic_node_type freelist;
+            std::atomic<unsigned int> pop_counter;
+
+            bool throws_on_empty;
             
         public:
 
@@ -56,27 +62,82 @@ namespace cxx_utils
 
         private:
 
+            void _release_node_chain(node_pointer node)
+            {
+                while(node)
+                {
+                    node_pointer nxt = node->next;
+                    delete node;
+                    node = nxt;
+                }
+            }
+
+            void release_internal_node(node_pointer node)
+            {
+                if (pop_counter == 1)
+                {
+                    node_pointer dnodes = freelist.exchange(nullptr);
+                    if(!--pop_counter)
+                    {
+                        /* this was the only release thread - just delete*/
+                        _release_node_chain(dnodes);
+                    }
+                    else if (dnodes)
+                    {
+                        /* re-enqueue on the freelist */
+                        node_pointer listnode = dnodes;
+                        while(listnode)
+                        {
+                            node_pointer nxt = listnode->next;
+                            do
+                            {
+                                listnode->next = freelist.load();
+                            }while(!freelist.compare_exchange_weak(listnode->next, listnode));
+                            listnode = nxt;
+                        }
+                    }
+                    delete node;
+                }
+                else
+                {
+                    do
+                    {
+                        node->next = freelist.load();
+                    }while(!freelist.compare_exchange_weak(node->next, node));
+                    --pop_counter;
+                }
+            }
+
             /**
              * @brief Internal routine to pop element from HEAD and replace
              * head with the 'next' value
              */
             node_pointer _pop_front()
             {
-                node_pointer ret = 0;
-                if( head )
+                node_pointer old_head = head.load();
+                while(old_head &&
+                      !head.compare_exchange_weak(old_head, old_head->next,
+                                                  std::memory_order_release,
+                                                  std::memory_order_relaxed));
+                
+                return old_head;
+            }
+            
+            bool _do_pop_front(T &result)
+            {
+                bool ret = false;
+                ++pop_counter; /* released in release_internal_node */
+
+                node_pointer front = _pop_front();
+                if( front )
                 {
-                    do
-                    {
-                        // @todo: need a fence
-                        if( !head ) throw lfstack_pop_empty();
-                        ret = head.load(std::memory_order_relaxed);
-                    }while( !head.compare_exchange_weak(ret, ret->next,
-                                                        std::memory_order_release,
-                                                        std::memory_order_relaxed) );
+                    result = front->val;
+                    release_internal_node(front);
+                    ret = true;
                 }
                 return ret;
             }
-
+            
             void _push_front(const value_type& val)
             {
                 node_pointer newhead = new node_type(val);
@@ -92,10 +153,11 @@ namespace cxx_utils
         public:
             void clear()
             {
-                node_pointer frontoflist = 0;
-                while ( (frontoflist = _pop_front()) )
-                    delete frontoflist;
-                
+                T tmp = T();
+                bool throwval = throws_on_empty;
+                throws_on_empty = false;
+                while ( !empty() && _do_pop_front(tmp) );
+                throws_on_empty = throwval;
             }
 
             void push_front(const T &type)
@@ -111,12 +173,8 @@ namespace cxx_utils
             T pop_front()
             {
                 T result = T();
-                node_pointer front = _pop_front();
-                if( front )
-                {
-                    result = front->val;
-                    delete front;
-                }
+                if (!_do_pop_front(result) && throws_on_empty)
+                    throw lfstack_pop_empty();
                 return result;
             }
 
@@ -126,8 +184,11 @@ namespace cxx_utils
             }
             
             bool empty(){ return head.load(std::memory_order_relaxed) == 0; }
+
+            bool get_throw_configuration() { return throws_on_empty; }
+            void set_throw_configuration(bool throws) { throws_on_empty = throws; }
             
-            lfstack() : head(0) {}
+            lfstack() : head(0), freelist(0), pop_counter(0), throws_on_empty(true) {}
             ~lfstack(){ clear(); }
         };
     }

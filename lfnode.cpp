@@ -28,7 +28,7 @@ void popper()
             {
                 ++pop1;
             }
-            else
+            else if( i == 2 )
                 ++pop2;
             ++times;
         } catch (cxx_utils::concurrent::lfstack_pop_empty &e)
@@ -61,5 +61,5 @@ int main()
     std::cout << "Got " << times << " pops 1(" << pop1 << "), 2(" << pop2 <<
         ")" << std::endl;
 
-    return (times == 2000000 && (pop1 == pop2) == 1000000) ? 0 : 1;
+    return (times == 2000000 && (pop1 == pop2) && pop1 == 1000000) ? 0 : 1;
 }

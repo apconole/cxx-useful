@@ -21,11 +21,12 @@ else
 CHECK_SYNTAXES+=check-syntax-cxx
 endif
 
-SAMPLE_PROGRAMS=cyclic_iterator_examples saturation_iterator_examples file_descriptor_examples
+SAMPLE_PROGRAMS=cyclic_iterator_examples saturation_iterator_examples file_descriptor_examples lfnode_examples
 
 CYCLIC_ITERATOR_EXAMPLE_OBJS=ring_buffer_ex.cpp moving_average.cpp 
 SATURATION_ITERATOR_EXAMPLE_OBJS=saturation_test.cpp
 FILE_DESCRIPTOR_EXAMPLE_OBJS=pipe_ex.cpp simple_fdstream_ex.cpp
+LFNODE_EXAMPLE_OBJS=lfnode.cpp
 
 .PHONY: all check-syntax check-syntax-c check-syntax-cxx clean
 
@@ -51,3 +52,6 @@ saturation_iterator_examples: cxxutils_examples_base.cpp $(SATURATION_ITERATOR_E
 
 file_descriptor_examples: cxxutils_examples_base.cpp $(FILE_DESCRIPTOR_EXAMPLE_OBJS)
 	$(CXX) $(CXXFLAGS) -DEXAMPLES_STRING="\"File Descriptor Buffer\"" -o $@ $< $(FILE_DESCRIPTOR_EXAMPLE_OBJS)
+
+lfnode_examples: $(LFNODE_EXAMPLE_OBJS)
+	$(CXX) $(CXXFLAGS) -DEXAMPLES_STRING="\"Lock free\"" -o $@ $(LFNODE_EXAMPLE_OBJS) -lpthread

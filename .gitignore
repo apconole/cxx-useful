@@ -39,3 +39,5 @@ GTAGS
 cyclic_iterator_examples
 file_descriptor_examples
 saturation_iterator_examples
+http_examples
+lfnode_examples

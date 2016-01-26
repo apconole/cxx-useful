@@ -1,4 +1,4 @@
-#include "lockfree-stack.hpp"
+#include "lockfree_stack.hpp"
 
 #include <iostream>
 #include <thread>

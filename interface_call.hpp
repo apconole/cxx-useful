@@ -14,15 +14,15 @@
 
 #include <iostream>
 
-#ifndef __CYCLIC_ITERATOR__H__
-#define __CYCLIC_ITERATOR__H__
+#include "property_bag.hpp"
+
+#ifndef __INTERFACE_CALL__H__
+#define __INTERFACE_CALL__H__
 
 namespace cxx_utils
 {
-    
     namespace misc
     {
-        class property_bag;
 
         /**
          * @brief Interface-call represents any kind of remote procedure
@@ -38,7 +38,7 @@ namespace cxx_utils
             
             virtual const char *format() const = 0;
             virtual int32_t help(std::ostream &rOutput, const size_t token) = 0;
-            virtual int32_t invoke(std::ostream &rOutput, std::istream &rInput, property_bag &rParameters) = 0;
+            virtual int32_t invoke(std::ostream &rOutput, std::istream &rInput, cxx_utils::misc::property_bag &rParameters) = 0;
         };
     }
 }

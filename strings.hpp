@@ -1,0 +1,62 @@
+// "http_message" -*- C++ -*-
+
+// Copyright (C) 2016 Aaron Conole
+//
+// This file is governed by the 'use this freely' common-sense license
+// This means the following:
+// - Take this header
+// - #include it in your project (commercial, or non)
+// - ???
+// - profit
+
+///
+///
+
+#pragma once
+
+#include <string>
+
+#ifndef __STRING_UTILS__H__
+#define __STRING_UTILS__H__
+
+namespace cxx_utils
+{
+    namespace string
+    {
+        class utils
+        {
+        public:
+            template<typename T>
+            static void tokenize(T &output,
+                                 const std::string &input,
+                                 const std::string &delims = std::string(" \r\n\t"))
+            {
+                size_t position = 0;
+                size_t adv_position = 0;
+
+                output.clear();
+
+                position = input.find_first_of(delims, position);
+                while( position != std::string::npos )
+                {
+                    std::string token =
+                        input.substr(adv_position, position - adv_position);
+                    if(token != "")
+                        output.push_back(token);
+                    position++;
+                    adv_position = position;
+                    position = input.find_first_of(delims, position);
+                }
+
+                if( adv_position < input.length() )
+                {
+                    output.push_back( input.substr ( adv_position ) );
+                }
+
+            }
+
+        };
+    }
+}
+
+#endif

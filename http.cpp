@@ -1,6 +1,6 @@
 #include "http_utils.hpp"
 #include <iostream>
-using cxx_utils::net::http_utils;
+using cxx_utils::net::http::utils;
 
 int main()
 {
@@ -36,12 +36,12 @@ int main()
     {
         std::string into(decode_tests[i].pre_decode);
         if (std::string(decode_tests[i].post_decode_expected) !=
-            http_utils::urldecode(into))
+            utils::urldecode(into))
         {
             std::cout << "Failed to decode [" << into << "] into ["
                       << decode_tests[i].post_decode_expected << "], for test "
                       << i << std::endl;
-            std::cout << "Got [" << http_utils::urldecode(into) << "]"
+            std::cout << "Got [" << utils::urldecode(into) << "]"
                       << std::endl;
             return 1;
         }
@@ -52,12 +52,12 @@ int main()
     {
         std::string into(encode_tests[i].pre_decode);
         if (std::string(encode_tests[i].post_decode_expected) !=
-            http_utils::urlencode(into))
+            utils::urlencode(into))
         {
             std::cout << "Failed to encode [" << into << "] into ["
                       << encode_tests[i].post_decode_expected << "], for test "
                       << i << std::endl;
-            std::cout << "Got [" << http_utils::urlencode(into) << "]"
+            std::cout << "Got [" << utils::urlencode(into) << "]"
                       << std::endl;
             return 1;
         }

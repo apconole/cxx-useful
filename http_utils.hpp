@@ -24,9 +24,25 @@ namespace cxx_utils
 {
     namespace net
     {
-        class http_utils
+        namespace http
+        {
+        class utils
         {
         public:
+            static std::string webdate( time_t now )
+            {
+                char buf[30];
+                struct tm curTm;
+#ifndef WIN32
+                gmtime_r(&now, &curTm);
+#else
+                memset( &curTm, 0, sizeof(curTm) );
+                _gmtime64_s(&gmt, &now);
+#endif
+                strftime( buf, sizeof(buf), "%A, %d-%b-%y %H:%M:%S", &curTm);
+                return std::string(buf);
+            }
+            
             static std::string urldecode( const std::string &urltext )
             {
                 std::string result;
@@ -95,6 +111,7 @@ namespace cxx_utils
                 return result;
             }
         };
+        }
     }
 }
 #endif

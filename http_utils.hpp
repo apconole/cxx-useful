@@ -17,8 +17,8 @@
 #include <string>
 #include <cctype>
 
-#ifndef __HTTP_MESSAGE__H__
-#define __HTTP_MESSAGE__H__
+#ifndef __HTTP_UTILS__H__
+#define __HTTP_UTILS__H__
 
 namespace cxx_utils
 {
@@ -42,7 +42,7 @@ namespace cxx_utils
                 strftime( buf, sizeof(buf), "%A, %d-%b-%y %H:%M:%S", &curTm);
                 return std::string(buf);
             }
-            
+
             static std::string urldecode( const std::string &urltext )
             {
                 std::string result;

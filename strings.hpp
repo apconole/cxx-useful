@@ -55,6 +55,19 @@ namespace cxx_utils
 
             }
 
+            static
+            std::string trim(const std::string &trimstring,
+                             const std::string &spaces = " \t")
+            {
+                const size_t startpos = trimstring.find_first_not_of(spaces);
+                if( startpos == std::string::npos )
+                    return "";
+
+                const size_t endpos = trimstring.find_last_not_of(spaces);
+                const size_t total = endpos - startpos + 1;
+
+                return trimstring.substr(startpos, total);
+            }
         };
     }
 }

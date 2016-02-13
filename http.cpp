@@ -1,4 +1,5 @@
 #include "http_utils.hpp"
+#include "http_message.hpp"
 #include <iostream>
 using cxx_utils::net::http::utils;
 
@@ -64,5 +65,13 @@ int main()
     }
 
     std::cout << "URL Encode / Decode finished" << std::endl;
+
+    std::string req = "GET /index.html HTTP/1.0\r\n\r\n";
+
+    cxx_utils::net::http::http_request request;
+    request << req;
+
+    std::cout << request;
+    
     return 0;
 }

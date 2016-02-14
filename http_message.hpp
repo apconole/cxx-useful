@@ -17,6 +17,9 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <sstream>
+#include <algorithm>
+#include <iostream>
 
 #include "strings.hpp"
 
@@ -80,8 +83,8 @@ namespace cxx_utils
             class http_message
             {
             public:
-                typedef std::map<std::string, std::string>  headers;
-                typedef std::vector<cookie> cookiejar;
+                typedef std::map<std::string, std::string> headers;
+                typedef std::vector<cookie>                cookiejar;
 
             protected:
                 std::int32_t     m_maj;
@@ -99,6 +102,36 @@ namespace cxx_utils
                 virtual void updated() = 0;
 
                 virtual std::string serialize() const = 0; 
+
+                const std::string &body() const { return m_body; }
+
+                bool get_header(const std::string &hdr, std::string &val) const
+                {
+                    for( headers::const_iterator it = m_httphdrs.cbegin();
+                         it != m_httphdrs.cend(); ++it ) {
+                        if( cxx_utils::string::utils::istringcmp(it->first,
+                                                                 hdr) ) {
+                            val = it->second;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                bool get_header(const char *hdr, std::string &val) const
+                {
+                    return get_header(std::string(hdr), val);
+                }
+
+                void set_header(const std::string &hdr, const std::string &val)
+                {
+                    m_httphdrs[hdr] = val;
+                }
+
+                void set_header(const char *hdr, const char *val)
+                {
+                    set_header(std::string(hdr), std::string(val));
+                }
 
                 virtual
                 http_message &operator<<(const std::string &rhs)
@@ -119,193 +152,7 @@ namespace cxx_utils
                     return output;
                 }
             };
-
-            class http_request : public http_message
-            {
-                enum parsing_states {
-                    parsing_method,
-                    parsing_uri,
-                    parsing_version,
-                    parsing_headers,
-                    parsing_body,
-                    parsing_done,
-
-                    parsing_err
-                };
-
-            public:
-                enum methods {
-                    get_method,
-                    post_method,
-                    put_method,
-                    delete_method,
-                    head_method,
-                    options_method,
-                    trace_method,
-
-                    max_method
-                };
-
-            protected:
-
-                methods        m_curmethod;
-                parsing_states m_curstate;
-                std::string    m_uri;
-                char           m_nextbreaktok;
-
-                void update_method()
-                {
-                    m_accumulator =
-                        cxx_utils::string::utils::trim(m_accumulator);
-
-                    if (m_accumulator.size() > 10) {
-                        m_curmethod = max_method;
-                    }
-
-                    // XXX: use a std::map for this mapping
-                    else if (m_accumulator == "GET") {
-                        m_curmethod = get_method;
-                    } else if (m_accumulator == "PUT") {
-                        m_curmethod = put_method;
-                    } else if (m_accumulator == "POST") {
-                        m_curmethod = post_method;
-                    } else if (m_accumulator == "DELETE") {
-                        m_curmethod = delete_method;
-                    } else if (m_accumulator == "HEAD") {
-                        m_curmethod = head_method;
-                    } else if (m_accumulator == "OPTIONS") {
-                        m_curmethod = options_method;
-                    } else if (m_accumulator == "TRACE") {
-                        m_curmethod = trace_method;
-                    } else {
-                        m_curmethod = max_method;
-                    }
-
-                    if (m_curmethod != max_method) {
-                        m_curstate = parsing_uri;
-                    } else {
-                        m_curstate = parsing_err;
-                    }
-
-                    m_accumulator.clear();
-                }
-                void update_uri()
-                {
-                    m_accumulator =
-                        cxx_utils::string::utils::trim(m_accumulator);
-                    if (m_accumulator.size() == 0)
-                        return;
-
-                    m_uri = utils::urldecode(m_accumulator);
-                    m_curstate = parsing_version;
-                    m_nextbreaktok = '\n';
-                }
-                void update_version()
-                {
-                    m_accumulator =
-                        cxx_utils::string::utils::trim(m_accumulator, " \r\n\t");
-                    if (m_accumulator.empty() ||
-                        m_accumulator.substr(0, 5) != "HTTP/") {
-                        m_curstate = parsing_err;
-                        return;
-                    }
-
-                    
-                }
-                void update_headers()
-                {
-                }
-                void update_body()
-                {
-                }
-            public:
-                http_request() : http_message(), m_curmethod(max_method),
-                                 m_curstate(parsing_method), m_uri(),
-                                 m_nextbreaktok(' ')
-                {
-                }
-                http_request(methods method, std::string uri,
-                             std::uint32_t maj = 1, std::uint32_t min = 0) :
-                    http_message(maj, min), m_curmethod(method), 
-                    m_curstate(parsing_done), m_uri(uri), m_nextbreaktok(' ')
-                {
-                }
-                virtual ~http_request()
-                {
-                }
-                virtual void updated()
-                {
-                    if( m_accumulator.size() == 0 ||
-                        *(m_accumulator.end() - 1) != m_nextbreaktok) {
-                        return;
-                    }
-
-                    switch(m_curstate){
-                    case parsing_done:
-                    case parsing_err:
-                    default:
-                        m_curstate = parsing_err;
-                        break;
-                    case parsing_method:
-                        update_method();
-                        break;
-                    case parsing_uri:
-                        update_uri();
-                        break;
-                    case parsing_version:
-                        update_version();
-                        break;
-                    case parsing_headers:
-                        update_headers();
-                        break;
-                    case parsing_body:
-                        update_body();
-                        break;
-                    }
-                }
-                virtual std::string serialize() const
-                {
-                    std::string result = "";
-
-                    switch(m_curmethod) {
-                    case get_method:
-                        result += "GET";
-                        break;
-                    case put_method:
-                        result += "PUT";
-                        break;
-                    case post_method:
-                        result += "POST";
-                        break;
-                    case delete_method:
-                        result += "DELETE";
-                        break;
-                    case head_method:
-                        result += "HEAD";
-                        break;
-                    case options_method:
-                        result += "OPTIONS";
-                        break;
-                    case trace_method:
-                        result += "TRACE";
-                        break;
-                    default:
-                        return "<ERROR>";
-                    }
-
-                    result += ' ';
-                    result += m_uri;
-                    result += " HTTP/";
-                    result += std::to_string(m_maj);
-                    result += ".";
-                    result += std::to_string(m_min);
-                    result += "\r\n";
-
-                    
-                    result += "\r\n";
-                    return result;
-                }
-            };
+#include "http_request.hpp"
         }
     }
 }

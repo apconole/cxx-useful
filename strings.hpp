@@ -68,6 +68,27 @@ namespace cxx_utils
 
                 return trimstring.substr(startpos, total);
             }
+
+            static inline bool istringcmp( const std::string& str1,
+                                           const std::string& str2,
+                                           bool substringmatches=false)
+            {
+                std::string str1Cpy(str1);
+                std::string str2Cpy(str2);
+                std::transform(str1Cpy.begin(), str1Cpy.end(), str1Cpy.begin(),
+                               ::tolower );
+                std::transform(str2Cpy.begin(), str2Cpy.end(), str2Cpy.begin(),
+                               ::tolower );
+                if( substringmatches )
+                {
+                    if( str1Cpy.length() < str2Cpy.length() )
+                        return str1Cpy == str2Cpy.substr(0, str1Cpy.length());
+                    else
+                        return str2Cpy == str1Cpy.substr(0, str2Cpy.length());
+                }
+                return ( str1Cpy == str2Cpy );
+            }
+
         };
     }
 }

@@ -66,7 +66,7 @@ int main()
 
     std::cout << "URL Encode / Decode finished" << std::endl;
 
-    std::string req = "GET /index.html HTTP/1.0\r\n\r\n";
+    std::string req = "GET /index.html HTTP/1.0\r\nUser-Agent: Fiction\r\nServer: localhost\r\n\r\n";
 
     cxx_utils::net::http::http_request request;
     request << req;

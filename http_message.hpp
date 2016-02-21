@@ -183,8 +183,11 @@ namespace cxx_utils
                     return output;
                 }
             };
-#include "http_request.hpp"
         }
     }
 }
+
+#include "http_response.hpp"
+#include "http_request.hpp"
+
 #endif

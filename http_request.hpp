@@ -4,8 +4,13 @@
 
 #ifndef __HTTP_REQUEST_MESSAGE_H__
 #define __HTTP_REQUEST_MESSAGE_H__
-
-class http_request : public http_message
+namespace cxx_utils
+{
+    namespace net
+    {
+        namespace http
+        {
+            class http_request : public http_message
             {
                 enum parsing_states {
                     parsing_method,
@@ -32,7 +37,7 @@ class http_request : public http_message
                 };
 
             protected:
-
+                http_response::codes m_suggestedcode;
                 methods        m_curmethod;
                 parsing_states m_curstate;
                 std::string    m_uri;
@@ -70,6 +75,7 @@ class http_request : public http_message
                         m_curstate = parsing_uri;
                     } else {
                         m_curstate = parsing_err;
+                        m_suggestedcode = http_response::not_implemented;
                     }
 
                     m_accumulator.clear();
@@ -88,9 +94,11 @@ class http_request : public http_message
                 }
                 void update_version()
                 {
-                    if ( parse_version() < 0 )
+                    if ( parse_version() < 0 ) {
+                        m_suggestedcode =
+                            http_response::http_version_not_supported;
                         m_curstate = parsing_err;
-                    else
+                    } else
                         m_curstate = parsing_headers;
                 }
                 void update_headers()
@@ -129,10 +137,10 @@ class http_request : public http_message
                                    cxx_utils::string::utils::trim
                                    (m_accumulator.substr(coldelim+1,
                                                          std::string::npos)));
-                        
                     }
                     m_accumulator.clear();
                 }
+
                 void update_body()
                 {
                     m_body += m_accumulator;
@@ -148,21 +156,37 @@ class http_request : public http_message
                     }
                 }
             public:
-                http_request() : http_message(), m_curmethod(max_method),
+                http_request() : http_message(),
+                                 m_suggestedcode(http_response::max_code),
+                                 m_curmethod(max_method),
                                  m_curstate(parsing_method), m_uri(),
                                  m_nextbreaktok(' ')
                 {
                 }
+
                 http_request(methods method, std::string uri,
                              std::uint32_t maj = 1, std::uint32_t min = 0) :
-                    http_message(maj, min), m_curmethod(method), 
+                    http_message(maj, min),
+                    m_suggestedcode(http_response::max_code),
+                    m_curmethod(method), 
                     m_curstate(parsing_done), m_uri(uri), m_nextbreaktok(' ')
                 {
                 }
+
                 virtual ~http_request()
                 {
                 }
-                
+
+                http_response::codes suggested() const
+                {
+                    return m_suggestedcode;
+                }
+
+                void clear_suggested()
+                {
+                    m_suggestedcode = http_response::max_code;
+                }
+
                 virtual void updated()
                 {
                     if( m_accumulator.size() == 0 ||
@@ -172,8 +196,13 @@ class http_request : public http_message
 
                     switch(m_curstate){
                     case parsing_done:
+                        m_suggestedcode =
+                            http_response::request_entity_too_large;
+                        m_curstate = parsing_err;
                     case parsing_err:
+                        break;
                     default:
+                        m_suggestedcode = http_response::bad_request;
                         m_curstate = parsing_err;
                         break;
                     case parsing_method:
@@ -193,6 +222,7 @@ class http_request : public http_message
                         break;
                     }
                 }
+
                 virtual std::string serialize() const
                 {
                     std::string result = "";
@@ -232,7 +262,7 @@ class http_request : public http_message
                     result += "\r\n";
 
                     std::string hdrval;
-                    
+
                     result += "Date: ";
                     if( !get_header("Date", hdrval) )
                         result += cxx_utils::net::http::utils::webdate
@@ -271,7 +301,7 @@ class http_request : public http_message
                         result += ick->value();
                         result += "\r\n";
                     }
-                    
+
                     if (!m_body.empty()) {
                         result += "Content-Length: " +
                             std::to_string(m_body.length());
@@ -282,5 +312,8 @@ class http_request : public http_message
                     return result;
                 }
             };
+        }
+    }
+}
 #endif
 

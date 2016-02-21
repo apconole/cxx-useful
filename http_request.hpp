@@ -2,6 +2,9 @@
 #error Cannot include this file directly
 #endif
 
+#ifndef __HTTP_REQUEST_MESSAGE_H__
+#define __HTTP_REQUEST_MESSAGE_H__
+
 class http_request : public http_message
             {
                 enum parsing_states {
@@ -85,27 +88,10 @@ class http_request : public http_message
                 }
                 void update_version()
                 {
-                    m_accumulator =
-                        cxx_utils::string::utils::trim(m_accumulator, " \r\n\t");
-                    if (m_accumulator.empty() ||
-                        m_accumulator.substr(0, 5) != "HTTP/") {
+                    if ( parse_version() < 0 )
                         m_curstate = parsing_err;
-                        return;
-                    }
-
-                    std::string data = m_accumulator.substr(5,
-                                                            std::string::npos);
-                    m_accumulator.clear();
-                    try {
-                        m_maj = std::stoi(
-                            data.substr(0, data.find_first_of(".")));
-                        m_min = std::stoi(
-                            data.substr(data.find_first_of(".")+1,
-                                        std::string::npos));
+                    else
                         m_curstate = parsing_headers;
-                    } catch (std::invalid_argument &e) {
-                        m_curstate = parsing_err;
-                    }
                 }
                 void update_headers()
                 {
@@ -135,7 +121,9 @@ class http_request : public http_message
                     if (cxx_utils::string::utils::istringcmp
                         (m_accumulator.substr(0, coldelim),
                          std::string("Cookie"))) {
-                        // add cookies later
+                        cookie c(m_accumulator.substr(coldelim+1,
+                                                      std::string::npos));
+                        m_cookies.push_back(c);
                     } else {
                         set_header(m_accumulator.substr(0, coldelim),
                                    cxx_utils::string::utils::trim
@@ -277,14 +265,22 @@ class http_request : public http_message
                         result += "\r\n";
                     }
 
-                    /*Cookies*/
+                    for(cookiejar::const_iterator ick = m_cookies.cbegin();
+                        ick != m_cookies.cend(); ++ick) {
+                        result += "Cookie: ";
+                        result += ick->value();
+                        result += "\r\n";
+                    }
                     
                     if (!m_body.empty()) {
                         result += "Content-Length: " +
                             std::to_string(m_body.length());
                         result += "\r\n";
+                        result += m_body;
                     }
                     result += "\r\n";
                     return result;
                 }
             };
+#endif
+

@@ -78,6 +78,11 @@ namespace cxx_utils
 
                     return m_sCookieString == cookieStr;
                 }
+
+                std::string value() const
+                {
+                    return m_sCookieString;
+                }
             };
 
             class http_message
@@ -93,8 +98,34 @@ namespace cxx_utils
                 cookiejar        m_cookies;
                 std::string      m_body;
                 std::string      m_accumulator;
+
+                int parse_version()
+                {
+                    m_accumulator =
+                        cxx_utils::string::utils::trim(m_accumulator,
+                                                       " \r\n\t");
+                    if (m_accumulator.empty() ||
+                        m_accumulator.substr(0, 5) != "HTTP/") {
+                        return -1;
+                    }
+
+                    std::string data=m_accumulator.substr(5,
+                                                          std::string::npos);
+                    m_accumulator.clear();
+                    try {
+                        m_maj = std::stoi(
+                            data.substr(0, data.find_first_of(".")));
+                        m_min = std::stoi(
+                            data.substr(data.find_first_of(".")+1,
+                                        std::string::npos));
+                        return 0;
+                    } catch (std::invalid_argument &e) {
+                        return -1;
+                    }
+                }
+
             public:
-                http_message(std::uint32_t major = 1, std::uint32_t minor = 1):
+                http_message(std::uint32_t major=1, std::uint32_t minor=1):
                     m_maj(major), m_min(minor), m_httphdrs(), m_cookies(),
                     m_body(), m_accumulator(){}
                 virtual ~http_message(){}
